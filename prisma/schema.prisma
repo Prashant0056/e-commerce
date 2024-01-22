@@ -47,11 +47,11 @@ model ProductItem {
 
 model ProductCategory {
   id                 Int               @id @default(autoincrement())
-  parent_category    ProductCategory?  @relation("ChildCategories", fields: [parent_category_id], references: [id])
-  parent_category_id Int?
+  // parent_category    ProductCategory?  @relation("ChildCategories", fields: [parent_category_id], references: [id])
+  // parent_category_id Int?
   category_name      String
   products           Product[]
-  children           ProductCategory[] @relation("ChildCategories")
+  //children           ProductCategory[] @relation("ChildCategories")
   variations         Variation[]
 }
 

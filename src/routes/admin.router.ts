@@ -22,6 +22,6 @@ router.get('/', authenticateToken, isAdmin, adminController.getUser)
 router.get('/:id', authenticateToken, isAdmin, adminController.getUserByID)
 router.get('/all-users', authenticateToken, isAdmin, adminController.getAllUser)
 
-router.use('/categories', categoryRouter)
+router.use('/categories', isAdmin, categoryRouter)
 
 export default router

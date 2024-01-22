@@ -54,30 +54,3 @@ export function isUser(
         throw Boom.forbidden('Admin do not have this privilage')
     }
 }
-
-export function isMyAccount(
-    req: RequestWithUserObject,
-    res: Response,
-    next: NextFunction
-) {
-    const token =
-        req.headers.authorization && req.headers.authorization.split(' ')[1]
-    if (!token) {
-        throw Boom.badRequest('Missing authentication token')
-    }
-
-    const decodedToken = jwt.verify(
-        token,
-        process.env.ACCESS_TOKEN_SECRET as string
-    ) as { userId?: number; isAdmin?: boolean }
-
-    const { userId, isAdmin } = decodedToken
-    console.log(userId, 'UIDDDD')
-
-    if (userId && req.user.userId === userId) {
-        console.log(userId, ' and ', req.user.userId)
-        next()
-    } else {
-        throw Boom.unauthorized('delete your own damn profile')
-    }
-}

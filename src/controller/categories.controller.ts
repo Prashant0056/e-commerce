@@ -6,5 +6,5 @@ export const addCategories = async (
     next: NextFunction
 ) => {
     console.log('okk')
-    next()
+    res.send('ok')
 }
