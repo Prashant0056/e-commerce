@@ -3,6 +3,7 @@ import userRouter from './routes/user.router'
 import adminRouter from './routes/admin.router'
 import { Response, Request, NextFunction } from 'express'
 import buildError from './util/build-errors'
+import { methodNotAllowed } from './middlewares/endpoint.error'
 const app = express()
 
 app.use(express.json())
@@ -15,6 +16,7 @@ app.listen(PORT, () => {
 
 app.use('/user', userRouter)
 app.use('/admin', adminRouter)
+app.use(methodNotAllowed)
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     const error = buildError(err)

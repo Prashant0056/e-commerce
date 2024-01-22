@@ -119,6 +119,5 @@ model Address {
   address_line2 String?
   city          String
   region        String
-  postal_code   String
   shop_order    ShopOrder[]
 }

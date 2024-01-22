@@ -3,6 +3,7 @@ import prisma from '../util/prisma'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import { exclude } from '../util/exclude'
+import { updateUserBodyDTO } from '../validators/profile.validator'
 import { signupBodyDTO } from '../validators/auth.validators'
 import {
     createAccessToken,
@@ -164,20 +165,45 @@ export const getAllUser = async () => {
 //UPDATE
 export const updateUser = async (
     id: number,
-    body: z.infer<typeof signupBodyDTO>
+    user: z.infer<typeof updateUserBodyDTO>
 ) => {
-    const { password } = body
-    let pass = await bcrypt.hash(password, 10)
+    const { addresses, password, ...rest } = user
+    const newPassword = password ? await bcrypt.hash(password, 10) : undefined
+
+    //update except address
     try {
-        await prisma.user.findUniqueOrThrow({
-            where: { id: Number(id) },
-        })
-        return await prisma.user.update({
-            where: { id: Number(id) },
-            data: {
-                password: pass,
+        const updatedUser = await prisma.user.update({
+            where: { id },
+            data: { ...rest, password: newPassword },
+            include: {
+                addresses: true,
             },
         })
+
+        if (!addresses) return exclude(updatedUser, ['password'])
+
+        const updatedAddresses = await Promise.all(
+            addresses.map(async (address) => {
+                if (address.id) {
+                    return await prisma.address.update({
+                        where: { id: address.id },
+                        data: address,
+                    })
+                }
+
+                const newAddress = await prisma.address.create({
+                    data: {
+                        ...address,
+                        id: undefined,
+                        user: { connect: { id } },
+                    },
+                })
+                return newAddress
+            })
+        )
+        updatedUser.addresses = updatedAddresses
+
+        return exclude(updatedUser, ['password'])
     } catch (err: any) {
         if (err.code === 'P2025') {
             throw Boom.notFound(`User with id ${id} does not exist`)
